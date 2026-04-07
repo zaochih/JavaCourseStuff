@@ -1,12 +1,13 @@
 package String;
 
 import java.util.Scanner;
+import java.util.StringJoiner;
 
 public class ZHCapitalizedNumber {
     static void main() {
         Scanner sc = new Scanner(System.in);
         while (true) {
-            IO.println("请输入一个不多于7位的非负整数。");
+            IO.print("请输入一个不多于7位的非负整数：");
             try {
                 int num = sc.nextInt();
                 if (num < 0 || String.valueOf(num).length() > 7) {
@@ -15,14 +16,15 @@ public class ZHCapitalizedNumber {
                 }
                 IO.println(toCapitalize(num) + "\n");
             } catch (Exception e) {
+                if (sc.hasNextLine()) { sc.nextLine(); } else { return; }
                 IO.println("数字无效。\n");
-                sc.nextLine();
             }
         }
     }
 
     public static String toCapitalize(int num) {
         StringBuilder sb = new StringBuilder();
+//        StringJoiner sj = new StringJoiner(", ");
         String toStringlized = "%07d".formatted(num);
         for (int i = 6; i >= 0; i--) {
             if (i > 4) {
@@ -36,6 +38,7 @@ public class ZHCapitalizedNumber {
             }
         }
         return sb.append("元").toString();
+//        return sj.add(sb.toString()).add("元").toString();
     }
 
     public static String capDict(int num) {
