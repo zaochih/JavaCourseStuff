@@ -11,13 +11,9 @@ public class useFile {
 
         byte[] bytes = new byte[1024];
 
-        for
-
         FileOutputStream fos = new FileOutputStream("SomeRandomText.txt");
 
         String string = "some 随机的 strings";
-
-        byte[] bytes = string.getBytes();
 
         fos.write(bytes);
 
