@@ -1,25 +1,39 @@
 package NetworkUse;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.*;
 
 public class chatHouseClient1 {
-    public static void main(String[] args) throws IOException {
-        // 自己监听的端口：1145
+    static void main() throws IOException {
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
         DatagramSocket ds = new DatagramSocket(1145);
 
-        // 目标地址和端口：127.0.0.1 : 1146
-        InetAddress destAddr = InetAddress.getByName("127.0.0.1");
-        int destPort = 1146;
+        IO.println("Client 1 已启动！开一个虚拟线程负责接收，主线程负责发送...");
 
-        IO.println("Client 1 已启动，可以开始打字聊天了...");
+        // 虚拟线程：死循环接收
+        Thread.startVirtualThread(() -> {
+            try {
+                byte[] buf = new byte[1024];
+                DatagramPacket receiveDp = new DatagramPacket(buf, buf.length);
+                while (true) {
+                    ds.receive(receiveDp);
+                    String msg = new String(receiveDp.getData(), 0, receiveDp.getLength());
+                    IO.println("\n[" + receiveDp.getAddress().getHostName() + ":" + receiveDp.getPort() + " 说] -> " + msg);
+                }
+            } catch (IOException e) {
+                IO.println("接收通道已关闭。");
+            }
+        });
 
-        // 启动接收线程 (后台运行)
-        new Thread(new ReceiverTask(ds)).start();
+        // 主线程：直接用 IO.readln() 发送
+        String newline = IO.readln();
+        while (newline != null && !newline.isEmpty()) {
+            byte[] data = newline.getBytes();
+            DatagramPacket sendDp = new DatagramPacket(data, data.length, addr, 1146);
+            ds.send(sendDp);
+            newline = IO.readln();
+        }
 
-        // 启动发送任务 (直接在主线程运行，或者也丢进 Thread 里)
-        // 主线程会卡在键盘输入这里，但接收线程不受影响
-        new SenderTask(ds, destAddr, destPort).run();
+        ds.close();
     }
 }
